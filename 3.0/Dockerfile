@@ -1,12 +1,7 @@
-FROM debian:jessie
+FROM buildpack-deps:trusty
 
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 RUN groupadd -r redis && useradd -r -g redis redis
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-		ca-certificates \
-		curl \
-	&& rm -rf /var/lib/apt/lists/*
 
 # grab gosu for easy step-down from root
 RUN gpg --keyserver pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4
@@ -21,10 +16,7 @@ ENV REDIS_DOWNLOAD_URL http://download.redis.io/releases/redis-3.0.7.tar.gz
 ENV REDIS_DOWNLOAD_SHA1 e56b4b7e033ae8dbf311f9191cf6fdf3ae974d1c
 
 # for redis-sentinel see: http://redis.io/topics/sentinel
-RUN buildDeps='gcc libc6-dev make' \
-	&& set -x \
-	&& apt-get update && apt-get install -y $buildDeps --no-install-recommends \
-	&& rm -rf /var/lib/apt/lists/* \
+RUN set -x \
 	&& mkdir -p /usr/src/redis \
 	&& curl -sSL "$REDIS_DOWNLOAD_URL" -o redis.tar.gz \
 	&& echo "$REDIS_DOWNLOAD_SHA1 *redis.tar.gz" | sha1sum -c - \
